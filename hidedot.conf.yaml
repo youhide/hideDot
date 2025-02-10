@@ -19,9 +19,6 @@
       url: "git@github.com:youhide/dotSecrets.git"
       description: "dotSecrets"
 
-- brew:
-    - neovim
-
 - shell:
     - [touch ~/.asdasd, creating asdasd file]
     - [rm ~/.asdasd, removing asdasd file]
