@@ -42,7 +42,8 @@ changelog:
       - "^test:"
 
 brews:
-  - repository:
+  - name: hidedot
+    repository:
       owner: youhide
       name: homebrew-youhide
     commit_author:
@@ -50,7 +51,7 @@ brews:
       email: youri@youhide.com.br
     homepage: "https://github.com/youhide/hideDot"
     description: "A dotfiles manager written in Go"
-    license: "DY"
+    license: "MIT"
     test: |
       system "#{bin}/hidedot --help"
     install: |
