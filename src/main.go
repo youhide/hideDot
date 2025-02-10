@@ -18,7 +18,6 @@ type Config struct {
 			Force  bool `yaml:"force"`
 		} `yaml:"link"`
 	} `yaml:"defaults,omitempty"`
-	Clean  []string           `yaml:"clean,omitempty"`
 	Link   map[string]string  `yaml:"link,omitempty"`
 	Create []string           `yaml:"create,omitempty"`
 	Git    map[string]GitRepo `yaml:"git,omitempty"`
@@ -148,15 +147,10 @@ func expandPath(path string, home string) string {
 
 func main() {
 	dryRun := flag.Bool("dry-run", false, "Show what would be done without making actual changes")
+	configFile := flag.String("config", "hidedot.conf.yaml", "Path to config file")
 	flag.Parse()
 
 	logger := &Logger{dryRun: *dryRun}
-
-	execDir, err := getExecutableDir()
-	if err != nil {
-		logger.log("Error getting executable directory: %v", err)
-		os.Exit(1)
-	}
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -164,7 +158,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	configPath := filepath.Join(currentDir, "hidedot.conf.yaml")
+	// Use provided config path or default to current directory
+	configPath := *configFile
+	if !filepath.IsAbs(configPath) {
+		configPath = filepath.Join(currentDir, configPath)
+	}
+
+	execDir, err := getExecutableDir()
+	if err != nil {
+		logger.log("Error getting executable directory: %v", err)
+		os.Exit(1)
+	}
+
+	// After configPath is set:
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		logger.log("Error reading config file: %v", err)
