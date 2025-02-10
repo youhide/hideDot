@@ -43,6 +43,7 @@ changelog:
 
 brews:
   - name: hidedot
+    directory: Formula
     repository:
       owner: youhide
       name: homebrew-youhide
