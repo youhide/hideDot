@@ -158,7 +158,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	configPath := filepath.Join(execDir, "install.conf.yaml")
+	configPath := filepath.Join(execDir, "hidedot.conf.yaml")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		logger.log("Error reading config file: %v", err)
