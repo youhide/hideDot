@@ -46,6 +46,7 @@ brews:
     repository:
       owner: youhide
       name: homebrew-youhide
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     commit_author:
       name: Youri T. K. K. Mattar
       email: youri@youhide.com.br
