@@ -41,6 +41,21 @@ changelog:
       - "^docs:"
       - "^test:"
 
+brews:
+  - repository:
+      owner: youhide
+      name: homebrew-youhide
+    commit_author:
+      name: Youri T. K. K. Mattar
+      email: youri@youhide.com.br
+    homepage: "https://github.com/youhide/hideDot"
+    description: "A dotfiles manager written in Go"
+    license: "DY"
+    test: |
+      system "#{bin}/hidedot --help"
+    install: |
+      bin.install "hidedot"
+
 release:
   footer: >-
 
