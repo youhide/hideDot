@@ -158,7 +158,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	configPath := filepath.Join(execDir, "hidedot.conf.yaml")
+	currentDir, err := os.Getwd()
+	if err != nil {
+		logger.log("Error getting current directory: %v", err)
+		os.Exit(1)
+	}
+
+	configPath := filepath.Join(currentDir, "hidedot.conf.yaml")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		logger.log("Error reading config file: %v", err)
