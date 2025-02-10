@@ -145,6 +145,20 @@ func expandPath(path string, home string) string {
 	return path
 }
 
+// function to handle source path expansion
+func expandSourcePath(path string, home string, execDir string) string {
+	// First expand any home directory references
+	path = expandPath(path, home)
+
+	// If the path is absolute after home expansion, use it as is
+	if filepath.IsAbs(path) {
+		return path
+	}
+
+	// Otherwise, treat it as relative to the executable directory
+	return filepath.Join(execDir, path)
+}
+
 func main() {
 	dryRun := flag.Bool("dry-run", false, "Show what would be done without making actual changes")
 	configFile := flag.String("config", "hidedot.conf.yaml", "Path to config file")
@@ -200,7 +214,7 @@ func main() {
 			logger.log("Creating links...")
 			for target, source := range config.Link {
 				targetPath := expandPath(target, home)
-				sourcePath := filepath.Join(execDir, source)
+				sourcePath := expandSourcePath(source, home, execDir)
 				sourcePath, _ = filepath.Abs(sourcePath)
 
 				// Check if source file exists

@@ -4,12 +4,12 @@
       force: true
 
 - link:
-    ~/.tmux.conf: ../files/tmux.conf
-    ~/.zshrc: ../files/zshrc
-    ~/.zprofile: ../files/zprofile
-    ~/.vimrc: ../files/vimrc
-    ~/.npmrc: ../files/npmrc
-    ~/.hushlogin: ../files/hushlogin
+    ~/.tmux.conf: ~/.dotFiles/files/tmux.conf
+    ~/.zshrc: ~/.dotFiles/files/zshrc
+    ~/.zprofile: ~/.dotFiles/files/zprofile
+    ~/.vimrc: ~/.dotFiles/files/vimrc
+    ~/.npmrc: ~/.dotFiles/files/npmrc
+    ~/.hushlogin: ~/.dotFiles/files/hushlogin
 
 - create:
     - ~/Git
