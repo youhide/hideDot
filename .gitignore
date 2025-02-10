@@ -1,2 +1,3 @@
 # Added by goreleaser init:
 dist/
+hidedot.conf.yaml
