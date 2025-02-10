@@ -1,0 +1,29 @@
+- defaults:
+    link:
+      relink: true
+      force: true
+
+- clean: ["~"]
+
+- link:
+    ~/.tmux.conf: ../files/tmux.conf
+    ~/.zshrc: ../files/zshrc
+    ~/.zprofile: ../files/zprofile
+    ~/.vimrc: ../files/vimrc
+    ~/.npmrc: ../files/npmrc
+    ~/.hushlogin: ../files/hushlogin
+
+- create:
+    - ~/Git
+
+- git:
+    "~/.password-store":
+      url: "git@github.com:youhide/dotSecrets.git"
+      description: "dotSecrets"
+
+- brew:
+    - neovim
+
+- shell:
+    - [touch ~/.asdasd, creating asdasd file]
+    - [rm ~/.asdasd, removing asdasd file]
