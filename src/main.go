@@ -184,7 +184,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// After configPath is set:
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		logger.log("Error reading config file: %v", err)
