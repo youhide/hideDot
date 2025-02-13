@@ -58,6 +58,10 @@ hidedot --config path/to/hidedot.conf.yaml
 - `--dry-run`: Show what would be done without making changes
 - `--config`: Specify config file path (default: hidedot.conf.yaml)
 
+## Documentation
+
+For detailed documentation, check out our [Wiki](../../wiki).
+
 ## License
 
 MIT License
