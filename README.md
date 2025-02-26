@@ -2,6 +2,8 @@
 
 A blazing fast dotFiles manager written in Go. Easily manage your dotfiles, symlinks, and system configuration with a simple YAML config.
 
+![](hidedot-logo.svg)
+
 ## Features
 
 - 🚀 Fast symlink management
