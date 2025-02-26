@@ -1,8 +1,6 @@
 # hideDot
-
 A blazing fast dotFiles manager written in Go. Easily manage your dotfiles, symlinks, and system configuration with a simple YAML config.
-
-![](hidedot-logo.svg)
+<p align="center"><img src="hidedot-logo.svg" alt="Description" width="300" height="300" align="center"></p>
 
 ## Features
 
