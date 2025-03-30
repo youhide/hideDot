@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hideDot - Blazing Fast dotFiles Manager</title>
+  <style>
+    :root {
+      --primary: #5CCFE6;
+      --secondary: #7FD962;
+      --accent: #FFCC66;
+      --dark: #2C3E50;
+      --darker: #1A2530;
+      --light: #f8f9fa;
+      --danger: #FF5D5D;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: var(--light);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--dark), var(--darker));
+      color: white;
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+
+    .logo-container {
+      max-width: 150px;
+      margin: 0 auto 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: var(--darker);
+      padding: 12px 24px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+    }
+
+    .features {
+      padding: 60px 0;
+      background-color: white;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2rem;
+      color: var(--dark);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .feature-item {
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .usage {
+      padding: 60px 0;
+      background-color: #f8f9fa;
+    }
+
+    pre {
+      background-color: var(--darker);
+      color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+
+    .install-steps {
+      margin: 40px 0;
+    }
+
+    .step {
+      margin-bottom: 30px;
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+    }
+
+    .step-number {
+      background-color: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+
+    footer {
+      background-color: var(--darker);
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .footer-link {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+          <!-- Background circle with gradient -->
+          <defs>
+            <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#1A2530;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+
+          <circle cx="150" cy="150" r="130" fill="url(#bg-gradient)" />
+
+          <!-- Main dot symbol -->
+          <circle cx="150" cy="150" r="48" fill="#5CCFE6" />
+
+          <!-- Inner dot (showing the concept of hiding/revealing) -->
+          <circle cx="150" cy="150" r="20" fill="#2C3E50" />
+
+          <!-- Orbital ring (representing file management) -->
+          <circle cx="150" cy="150" r="80" fill="none" stroke="#7FD962" stroke-width="6" stroke-dasharray="6,8" />
+
+          <!-- Tilde symbol (home directory) - more subtle -->
+          <path d="M125 100 Q138 85, 150 100 Q162 115, 175 100" stroke="#FFCC66" stroke-width="8" stroke-linecap="round"
+            fill="none" />
+
+          <!-- Hidden dot representations arranged in a circle -->
+          <circle cx="150" cy="70" r="8" fill="#FF5D5D" />
+          <circle cx="207" cy="93" r="8" fill="#FF5D5D" />
+          <circle cx="230" cy="150" r="8" fill="#FF5D5D" />
+          <circle cx="207" cy="207" r="8" fill="#FF5D5D" />
+          <circle cx="150" cy="230" r="8" fill="#FF5D5D" />
+          <circle cx="93" cy="207" r="8" fill="#FF5D5D" />
+          <circle cx="70" cy="150" r="8" fill="#FF5D5D" />
+          <circle cx="93" cy="93" r="8" fill="#FF5D5D" />
+        </svg>
+      </div>
+      <h1>hideDot</h1>
+      <p class="tagline">A blazing fast dotFiles manager written in Go</p>
+      <div class="buttons">
+        <a href="https://github.com/youhide/hidedot" class="btn">View on GitHub</a>
+        <a href="#installation" class="btn btn-secondary">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Features</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🚀</div>
+          <h3 class="feature-title">Fast Symlink Management</h3>
+          <p>Quickly manage and organize all your symlinks with blazing speed.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🏠</div>
+          <h3 class="feature-title">Home Directory Expansion</h3>
+          <p>Automatic expansion of home directory paths using the tilde (~/) symbol.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔄</div>
+          <h3 class="feature-title">Git Repository Cloning</h3>
+          <p>Easily clone and manage your Git repositories in one place.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🛠️</div>
+          <h3 class="feature-title">Shell Command Execution</h3>
+          <p>Run shell commands as part of your dotfiles setup process.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔍</div>
+          <h3 class="feature-title">Duplicate Detection</h3>
+          <p>Automatically detect and handle duplicate symlinks in your system.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🧪</div>
+          <h3 class="feature-title">Dry-Run Mode</h3>
+          <p>Preview changes before applying them with a comprehensive dry-run mode.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="usage" id="installation">
+    <div class="container">
+      <h2 class="section-title">Getting Started</h2>
+
+      <div class="install-steps">
+        <div class="step">
+          <h3 class="step-title"><span class="step-number">1</span>Installation</h3>
+          <p>Install hideDot using Homebrew:</p>
+          <pre><code>brew tap youhide/homebrew-youhide
+brew install hidedot</code></pre>
+        </div>
+
+        <div class="step">
+          <h3 class="step-title"><span class="step-number">2</span>Create Configuration</h3>
+          <p>Create a <code>hidedot.conf.yaml</code> file:</p>
+          <pre><code>- defaults:
+    link:
+      relink: true
+      force: true
+  
+  # Create directories
+  create:
+    - ~/.config
+    - ~/.local/bin
+  
+  # Manage symlinks
+  link:
+    ~/.config/nvim: ~/.mydotfiles/nvim
+    ~/.zshrc: ~/.mydotfiles/zsh/zshrc
+  
+  # Clone git repositories
+  git:
+    ~/.oh-my-zsh:
+      url: https://github.com/ohmyzsh/ohmyzsh.git
+      description: "Oh My Zsh"
+
+  # Run shell commands
+  shell:
+    - [touch ~/.hushlogin, Create hushlogin]</code></pre>
+        </div>
+
+        <div class="step">
+          <h3 class="step-title"><span class="step-number">3</span>Run hideDot</h3>
+          <p>Execute hideDot with your configuration file:</p>
+          <pre><code>hidedot --config path/to/hidedot.conf.yaml</code></pre>
+          <p>Or run in dry-run mode to preview changes:</p>
+          <pre><code>hidedot --dry-run --config path/to/hidedot.conf.yaml</code></pre>
+        </div>
+      </div>
+
+      <h3 class="section-title">Command Options</h3>
+      <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
+        <li><strong>--dry-run</strong>: Show what would be done without making changes</li>
+        <li><strong>--config</strong>: Specify config file path (default: hidedot.conf.yaml)</li>
+        <li><strong>--no-color</strong>: Disable colored output</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>hideDot is released under the MIT License</p>
+      <div class="footer-links">
+        <a href="https://github.com/youhide/hidedot" class="footer-link">GitHub</a>
+        <a href="https://github.com/youhide/hidedot/issues" class="footer-link">Issues</a>
+        <a href="https://github.com/youhide/hidedot/blob/main/LICENSE" class="footer-link">License</a>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
