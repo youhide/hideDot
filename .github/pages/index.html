@@ -343,9 +343,29 @@
           <p>Quickly manage and organize all your symlinks with blazing speed.</p>
         </div>
         <div class="feature-item">
-          <div class="feature-icon">🏠</div>
-          <h3 class="feature-title">Home Directory Expansion</h3>
-          <p>Automatic expansion of home directory paths using the tilde (~/) symbol.</p>
+          <div class="feature-icon">🔙</div>
+          <h3 class="feature-title">Automatic Backups</h3>
+          <p>Files are automatically backed up before being overwritten for safety.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📋</div>
+          <h3 class="feature-title">Status Command</h3>
+          <p>Check symlink health with OK, MISSING, BROKEN, and MISMATCH states.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🏷️</div>
+          <h3 class="feature-title">Profiles</h3>
+          <p>Different configurations for different machines or environments.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📝</div>
+          <h3 class="feature-title">Templates</h3>
+          <p>Use variables like hostname, OS, arch in your configuration.</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🪝</div>
+          <h3 class="feature-title">Hooks</h3>
+          <p>Run custom commands before and after link/shell operations.</p>
         </div>
         <div class="feature-item">
           <div class="feature-icon">🔄</div>
@@ -354,13 +374,8 @@
         </div>
         <div class="feature-item">
           <div class="feature-icon">🛠️</div>
-          <h3 class="feature-title">Shell Command Execution</h3>
-          <p>Run shell commands as part of your dotfiles setup process.</p>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🔍</div>
-          <h3 class="feature-title">Duplicate Detection</h3>
-          <p>Automatically detect and handle duplicate symlinks in your system.</p>
+          <h3 class="feature-title">Shell Commands</h3>
+          <p>Run shell commands with stdin support for creating files.</p>
         </div>
         <div class="feature-item">
           <div class="feature-icon">🧪</div>
@@ -390,6 +405,9 @@ brew install hidedot</code></pre>
     link:
       relink: true
       force: true
+      backup: true  # Enable automatic backups
+  
+  profile: personal  # Optional: for multi-machine setups
   
   # Create directories
   create:
@@ -409,24 +427,52 @@ brew install hidedot</code></pre>
 
   # Run shell commands
   shell:
-    - [touch ~/.hushlogin, Create hushlogin]</code></pre>
-        </div>
+    - [touch ~/.hushlogin, Create hushlogin]
+  
+  # Hooks for custom actionsto create symlinks:</p>
+          <pre><code># Create symlinks (default command)
+hidedot
 
-        <div class="step">
-          <h3 class="step-title"><span class="step-number">3</span>Run hideDot</h3>
-          <p>Execute hideDot with your configuration file:</p>
-          <pre><code>hidedot --config path/to/hidedot.conf.yaml</code></pre>
-          <p>Or run in dry-run mode to preview changes:</p>
-          <pre><code>hidedot --dry-run --config path/to/hidedot.conf.yaml</code></pre>
+# Or with custom config
+hidedot --config path/to/hidedot.conf.yaml
+
+# Preview changes first
+hidedot --dry-run
+
+# Check status of symlinks
+hidedot status
+
+# Remove symlinks and restore backups
+hidedot unlink --restore</code></pre>
         </div>
       </div>
 
-      <h3 class="section-title">Command Options</h3>
-      <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
-        <li><strong>--dry-run</strong>: Show what would be done without making changes</li>
-        <li><strong>--config</strong>: Specify config file path (default: hidedot.conf.yaml)</li>
-        <li><strong>--no-color</strong>: Disable colored output</li>
+      <h3 class="section-title">Commands</h3>
+      <ul style="max-width: 600px; margin: 0 auto 30px; list-style-position: inside;">
+        <li><strong>link</strong>: Create symlinks from config (default)</li>
+        <li><strong>status</strong>: Show status of all symlinks</li>
+        <li><strong>unlink</strong>: Remove symlinks (use --restore to restore backups)</li>
+        <li><strong>backup create/list</strong>: Manage backups</li>
       </ul>
+
+      <h3 class="section-title">Options</h3>
+      <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
+        <li><strong>--config, -c</strong>: Specify config file path</li>
+        <li><strong>--profile, -p</strong>: Only apply configs matching this profile</li>
+        <li><strong>--dry-run, -n</strong>: Show what would be done without making changes</li>
+        <li><strong>--verbose, -v</strong>: Enable verbose output</li>
+        <li><strong>--quiet, -q</strong>: Only show errors</li>
+        <li><strong>--no-color</strong>: Disable colored output</li>
+        <li><strong>--no-backup</strong>: Disable automatic backups.conf.yaml</code></pre>
+    </div>
+    </div>
+
+    <h3 class="section-title">Command Options</h3>
+    <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
+      <li><strong>--dry-run</strong>: Show what would be done without making changes</li>
+      <li><strong>--config</strong>: Specify config file path (default: hidedot.conf.yaml)</li>
+      <li><strong>--no-color</strong>: Disable colored output</li>
+    </ul>
     </div>
   </section>
 
