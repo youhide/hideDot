@@ -165,7 +165,3 @@ hidedot unlink --restore
 ## Documentation
 
 For detailed documentation, check out our [Wiki](../../wiki).
-
-## License
-
-MIT License
