@@ -56,7 +56,7 @@ brews:
       email: youri@youhide.com.br
     homepage: "https://github.com/youhide/hideDot"
     description: "A dotfiles manager written in Go"
-    license: "MIT"
+    license: "GPL-3.0"
     test: |
       system "#{bin}/hidedot --help"
     install: |
