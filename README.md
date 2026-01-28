@@ -165,3 +165,9 @@ hidedot unlink --restore
 ## Documentation
 
 For detailed documentation, check out our [Wiki](../../wiki).
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+
+This means you are free to use, modify, and distribute this software, as long as any derivative works are also licensed under GPL-3.0.
