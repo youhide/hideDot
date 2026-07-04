@@ -8,7 +8,7 @@ before:
     # - go generate ./...
 
 builds:
-  - main: ./src/main.go
+  - main: ./src
     binary: hidedot
     env:
       - CGO_ENABLED=0
