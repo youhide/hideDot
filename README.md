@@ -21,7 +21,7 @@ A blazing fast dotFiles manager written in Go. Easily manage your dotfiles, syml
 
 ```bash
 brew tap youhide/homebrew-youhide
-brew install --cask hidedot
+brew install hidedot
 ```
 
 ## Usage

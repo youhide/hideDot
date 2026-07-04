@@ -1,8 +1,7 @@
 # .github/workflows/release.yml
-name: goreleaser
+name: release
 
 on:
-  pull_request:
   push:
     tags:
       - "*"
@@ -10,12 +9,9 @@ on:
 
 permissions:
   contents: write
-  # packages: write
-  # issues: write
-  # id-token: write
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,4 +30,17 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+      - name: Update Homebrew tap formula
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          TAP_REPO: youhide/homebrew-youhide
+          RELEASE_REPO: ${{ github.repository }}
+          PROJECT_NAME: hideDot
+          FORMULA_NAME: hidedot
+          BINARY_NAME: hidedot
+          DESCRIPTION: "A dotfiles manager written in Go"
+          HOMEPAGE: "https://github.com/youhide/hideDot"
+          LICENSE: "GPL-3.0"
+          TAG: ${{ github.ref_name }}
+        run: bash .github/scripts/update-tap-formula.sh

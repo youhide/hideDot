@@ -1,5 +1,7 @@
 version: 2
 
+project_name: hideDot
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -45,27 +47,11 @@ changelog:
       - "^docs:"
       - "^test:"
 
-homebrew_casks:
-  - name: hidedot
-    binaries:
-      - hidedot
-    conflicts:
-      - formula: hidedot
-    repository:
-      owner: youhide
-      name: homebrew-youhide
-      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
-    commit_author:
-      name: Youri T. K. K. Mattar
-      email: youri@youhide.com.br
-    homepage: "https://github.com/youhide/hideDot"
-    description: "A dotfiles manager written in Go"
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/hidedot"]
-          end
+# The Homebrew formula is published to youhide/homebrew-youhide by a dedicated
+# CI step (.github/scripts/update-tap-formula.sh) that reads these checksums —
+# GoReleaser only builds the binaries, archives and GitHub release here.
+checksum:
+  name_template: "checksums.txt"
 
 release:
   footer: >-
