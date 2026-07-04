@@ -21,7 +21,7 @@ A blazing fast dotFiles manager written in Go. Easily manage your dotfiles, syml
 
 ```bash
 brew tap youhide/homebrew-youhide
-brew install hidedot
+brew install --cask hidedot
 ```
 
 ## Usage
@@ -29,6 +29,12 @@ brew install hidedot
 ### Basic Commands
 
 ```bash
+# Scaffold a starter config in the current directory
+hidedot init
+
+# Adopt an existing file: move it into the dotfiles dir and symlink it back
+hidedot adopt ~/.zshrc
+
 # Create symlinks (default command)
 hidedot
 hidedot link
@@ -134,6 +140,8 @@ Available template variables:
 
 | Command | Description |
 |---------|-------------|
+| `init` | Create a starter `hidedot.conf.yaml` (use `--force` to overwrite) |
+| `adopt <path>` | Move an existing file/dir into the dotfiles dir and replace it with a symlink |
 | `link` | Create symlinks from config (default) |
 | `status` | Show status of all symlinks (OK, MISSING, BROKEN, MISMATCH) |
 | `unlink` | Remove symlinks (use `--restore` to restore backups) |
