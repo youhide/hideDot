@@ -24,6 +24,10 @@ brew tap youhide/homebrew-youhide
 brew install hidedot
 ```
 
+> Recent Homebrew versions require you to trust third-party taps before the
+> first install. If you see `Refusing to load formula ... from untrusted tap`,
+> run `brew trust youhide/youhide` once and re-run the install.
+
 ## Usage
 
 ### Basic Commands
