@@ -33,16 +33,28 @@ func TestExpandPath(t *testing.T) {
 }
 
 func TestExpandSourcePath(t *testing.T) {
-	home := "/home/user"
-	execDir := "/repo/dotfiles"
+	// Use filepath.Abs so the "absolute" cases are truly absolute on every OS
+	// (a leading "/" is not absolute on Windows, which lacks a drive letter).
+	home, err := filepath.Abs(filepath.Join("home", "user"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	execDir, err := filepath.Abs(filepath.Join("repo", "dotfiles"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	abs, err := filepath.Abs(filepath.Join("opt", "x"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []struct {
 		name string
 		in   string
 		want string
 	}{
-		{"absolute", "/opt/x", "/opt/x"},
+		{"absolute", abs, abs},
 		{"tilde", "~/src", filepath.Join(home, "src")},
-		{"relative to execDir", "zsh/zshrc", filepath.Join(execDir, "zsh/zshrc")},
+		{"relative to execDir", filepath.Join("zsh", "zshrc"), filepath.Join(execDir, "zsh", "zshrc")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,10 +66,11 @@ func TestExpandSourcePath(t *testing.T) {
 }
 
 func TestGetBackupPath(t *testing.T) {
-	app := &App{backupDir: "/backups"}
-	p1 := app.getBackupPath("/home/user/.zshrc")
-	p2 := app.getBackupPath("/home/user/.zshrc")
-	p3 := app.getBackupPath("/home/user/.vimrc")
+	backupDir := t.TempDir()
+	app := &App{backupDir: backupDir}
+	p1 := app.getBackupPath(filepath.Join("home", "user", ".zshrc"))
+	p2 := app.getBackupPath(filepath.Join("home", "user", ".zshrc"))
+	p3 := app.getBackupPath(filepath.Join("home", "user", ".vimrc"))
 
 	if p1 != p2 {
 		t.Errorf("getBackupPath not deterministic: %q vs %q", p1, p2)
@@ -65,7 +78,7 @@ func TestGetBackupPath(t *testing.T) {
 	if p1 == p3 {
 		t.Errorf("getBackupPath collision for different inputs: %q", p1)
 	}
-	if filepath.Dir(p1) != "/backups" {
+	if filepath.Dir(p1) != backupDir {
 		t.Errorf("backup not under backupDir: %q", p1)
 	}
 	if !strings.HasPrefix(filepath.Base(p1), ".zshrc_") {
@@ -202,7 +215,8 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if info.Mode().Perm() != 0640 {
+	// Unix permission bits don't map onto Windows, where Go reports 0666/0444.
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0640 {
 		t.Errorf("copied mode = %v, want 0640", info.Mode().Perm())
 	}
 }
