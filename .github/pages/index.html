@@ -400,25 +400,25 @@ brew install hidedot</code></pre>
 
         <div class="step">
           <h3 class="step-title"><span class="step-number">2</span>Create Configuration</h3>
-          <p>Create a <code>hidedot.conf.yaml</code> file:</p>
+          <p>Scaffold a starter config with <code>hidedot init</code>, or create a <code>hidedot.conf.yaml</code> by hand:</p>
           <pre><code>- defaults:
     link:
       relink: true
       force: true
       backup: true  # Enable automatic backups
-  
+
   profile: personal  # Optional: for multi-machine setups
-  
+
   # Create directories
   create:
     - ~/.config
     - ~/.local/bin
-  
+
   # Manage symlinks
   link:
     ~/.config/nvim: ~/.mydotfiles/nvim
     ~/.zshrc: ~/.mydotfiles/zsh/zshrc
-  
+
   # Clone git repositories
   git:
     ~/.oh-my-zsh:
@@ -428,12 +428,28 @@ brew install hidedot</code></pre>
   # Run shell commands
   shell:
     - [touch ~/.hushlogin, Create hushlogin]
-  
-  # Hooks for custom actionsto create symlinks:</p>
-          <pre><code># Create symlinks (default command)
+
+  # Hooks for custom actions
+  hooks:
+    pre_link:
+      - echo "Starting link process..."
+    post_link:
+      - echo "Links created successfully!"</code></pre>
+        </div>
+
+        <div class="step">
+          <h3 class="step-title"><span class="step-number">3</span>Link Your Dotfiles</h3>
+          <p>Run hideDot to create the symlinks:</p>
+          <pre><code># Scaffold a starter config
+hidedot init
+
+# Adopt an existing file into your dotfiles dir
+hidedot adopt ~/.zshrc
+
+# Create symlinks (default command)
 hidedot
 
-# Or with custom config
+# Or with a custom config
 hidedot --config path/to/hidedot.conf.yaml
 
 # Preview changes first
@@ -449,30 +465,24 @@ hidedot unlink --restore</code></pre>
 
       <h3 class="section-title">Commands</h3>
       <ul style="max-width: 600px; margin: 0 auto 30px; list-style-position: inside;">
+        <li><strong>init</strong>: Create a starter <code>hidedot.conf.yaml</code> (use --force to overwrite)</li>
+        <li><strong>adopt &lt;path&gt;</strong>: Move an existing file into the dotfiles dir and symlink it back</li>
         <li><strong>link</strong>: Create symlinks from config (default)</li>
-        <li><strong>status</strong>: Show status of all symlinks</li>
+        <li><strong>status</strong>: Show status of all symlinks (OK, MISSING, BROKEN, MISMATCH)</li>
         <li><strong>unlink</strong>: Remove symlinks (use --restore to restore backups)</li>
         <li><strong>backup create/list</strong>: Manage backups</li>
       </ul>
 
       <h3 class="section-title">Options</h3>
       <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
-        <li><strong>--config, -c</strong>: Specify config file path</li>
+        <li><strong>--config, -c</strong>: Specify config file path (default: hidedot.conf.yaml)</li>
         <li><strong>--profile, -p</strong>: Only apply configs matching this profile</li>
         <li><strong>--dry-run, -n</strong>: Show what would be done without making changes</li>
         <li><strong>--verbose, -v</strong>: Enable verbose output</li>
         <li><strong>--quiet, -q</strong>: Only show errors</li>
         <li><strong>--no-color</strong>: Disable colored output</li>
-        <li><strong>--no-backup</strong>: Disable automatic backups.conf.yaml</code></pre>
-    </div>
-    </div>
-
-    <h3 class="section-title">Command Options</h3>
-    <ul style="max-width: 600px; margin: 0 auto; list-style-position: inside;">
-      <li><strong>--dry-run</strong>: Show what would be done without making changes</li>
-      <li><strong>--config</strong>: Specify config file path (default: hidedot.conf.yaml)</li>
-      <li><strong>--no-color</strong>: Disable colored output</li>
-    </ul>
+        <li><strong>--no-backup</strong>: Disable automatic backups</li>
+      </ul>
     </div>
   </section>
 
