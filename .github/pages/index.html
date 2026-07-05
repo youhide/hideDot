@@ -4,7 +4,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>hideDot - Blazing Fast dotFiles Manager</title>
+  <title>hideDot — Blazing Fast dotFiles Manager Written in Go</title>
+  <meta name="description"
+    content="hideDot is a blazing-fast dotfiles manager written in Go. Manage symlinks, automatic backups, profiles, templates, and hooks from a single YAML config. Install with Homebrew on macOS, Linux, and Windows.">
+  <meta name="keywords"
+    content="dotfiles manager, dotfiles, symlink manager, Go CLI, hidedot, dotfiles Go, Homebrew dotfiles, YAML dotfiles, manage dotfiles, dotfiles backup">
+  <meta name="author" content="youhide">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2C3E50">
+  <link rel="canonical" href="https://youhide.github.io/hideDot/">
+  <link rel="icon" type="image/svg+xml" href="hidedot-logo.svg">
+
+  <!-- Open Graph / Facebook / Slack / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="hideDot">
+  <meta property="og:title" content="hideDot — Blazing Fast dotFiles Manager Written in Go">
+  <meta property="og:description"
+    content="Manage symlinks, automatic backups, profiles, templates, and hooks from a single YAML config. Install with Homebrew.">
+  <meta property="og:url" content="https://youhide.github.io/hideDot/">
+  <meta property="og:image" content="https://youhide.github.io/hideDot/hidedot-logo.svg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="hideDot — Blazing Fast dotFiles Manager Written in Go">
+  <meta name="twitter:description"
+    content="Manage symlinks, automatic backups, profiles, templates, and hooks from a single YAML config. Install with Homebrew.">
+  <meta name="twitter:image" content="https://youhide.github.io/hideDot/hidedot-logo.svg">
+
+  <!-- Structured data: the tool itself (SEO + generative engines) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "hideDot",
+    "description": "A blazing-fast dotfiles manager written in Go. Manage symlinks, automatic backups, profiles, templates, and hooks from a single YAML config.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Linux, Windows",
+    "url": "https://youhide.github.io/hideDot/",
+    "downloadUrl": "https://github.com/youhide/hideDot",
+    "softwareVersion": "latest",
+    "programmingLanguage": "Go",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "author": {
+      "@type": "Organization",
+      "name": "youhide",
+      "url": "https://github.com/youhide"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- Structured data: FAQ (helps generative engines cite answers) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is hideDot?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "hideDot is a blazing-fast dotfiles manager written in Go. It manages symlinks, automatic backups, profiles, templates, and hooks from a single YAML configuration file."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install hideDot?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install hideDot with Homebrew: run 'brew tap youhide/homebrew-youhide' followed by 'brew install hidedot'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which operating systems does hideDot support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "hideDot runs on macOS, Linux, and Windows. Template variables let you adapt configuration per hostname, OS, and architecture."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does hideDot back up my files?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. hideDot automatically backs up any file before overwriting it. You can restore backups with 'hidedot unlink --restore' and manage them with 'hidedot backup create' and 'hidedot backup list'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is hideDot free and open source?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. hideDot is free and open source, released under the GNU General Public License v3.0 (GPL-3.0)."
+        }
+      }
+    ]
+  }
+  </script>
   <style>
     :root {
       --primary: #5CCFE6;
@@ -234,6 +336,31 @@
       text-decoration: underline;
     }
 
+    .faq {
+      padding: 60px 0;
+      background-color: white;
+    }
+
+    .faq-list {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      padding: 20px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .faq-question {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .faq-answer {
+      color: #555;
+    }
+
     @media (max-width: 768px) {
       h1 {
         font-size: 2rem;
@@ -259,7 +386,8 @@
   <header>
     <div class="container">
       <div class="logo-container" id="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img"
+          aria-label="hideDot logo — a stylized hidden dotfile">
           <!-- Background circle with gradient -->
           <defs>
             <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -483,6 +611,40 @@ hidedot unlink --restore</code></pre>
         <li><strong>--no-color</strong>: Disable colored output</li>
         <li><strong>--no-backup</strong>: Disable automatic backups</li>
       </ul>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <h3 class="faq-question">What is hideDot?</h3>
+          <p class="faq-answer">hideDot is a blazing-fast dotfiles manager written in Go. It manages symlinks,
+            automatic backups, profiles, templates, and hooks from a single YAML configuration file.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-question">How do I install hideDot?</h3>
+          <p class="faq-answer">Install hideDot with Homebrew: run <code>brew tap youhide/homebrew-youhide</code>
+            followed by <code>brew install hidedot</code>.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-question">Which operating systems does hideDot support?</h3>
+          <p class="faq-answer">hideDot runs on macOS, Linux, and Windows. Template variables let you adapt
+            configuration per hostname, OS, and architecture.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-question">Does hideDot back up my files?</h3>
+          <p class="faq-answer">Yes. hideDot automatically backs up any file before overwriting it. You can restore
+            backups with <code>hidedot unlink --restore</code> and manage them with <code>hidedot backup create</code>
+            and <code>hidedot backup list</code>.</p>
+        </div>
+        <div class="faq-item">
+          <h3 class="faq-question">Is hideDot free and open source?</h3>
+          <p class="faq-answer">Yes. hideDot is free and open source, released under the GNU General Public License
+            v3.0 (GPL-3.0).</p>
+        </div>
+      </div>
     </div>
   </section>
 
