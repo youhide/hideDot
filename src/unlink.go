@@ -4,14 +4,18 @@
 
 package main
 
-import "os"
+import (
+	"maps"
+	"os"
+	"slices"
+)
 
 // RunUnlink removes symlinks and optionally restores backups
 func (app *App) RunUnlink(configs []Config, restore bool) error {
 	for _, config := range configs {
 		if len(config.Link) > 0 {
 			app.logger.heading("Removing symlinks...")
-			for target := range config.Link {
+			for _, target := range slices.Sorted(maps.Keys(config.Link)) {
 				targetPath := expandPath(target, app.homeDir)
 
 				// Check if target exists and is a symlink
@@ -48,5 +52,5 @@ func (app *App) RunUnlink(configs []Config, restore bool) error {
 	}
 
 	app.logger.summary()
-	return nil
+	return app.failureError()
 }

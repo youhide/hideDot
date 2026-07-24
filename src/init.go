@@ -14,7 +14,8 @@ const defaultConfigTemplate = `- defaults:
     link:
       relink: true
       force: true
-      backup: true  # Enable automatic backups
+      backup: true  # Automatic backups (on unless set to false)
+      # remove_duplicates: true  # Delete other symlinks pointing at the same source
 
   # Create directories before linking
   create:

@@ -533,7 +533,7 @@ brew install hidedot</code></pre>
     link:
       relink: true
       force: true
-      backup: true  # Enable automatic backups
+      backup: true  # Automatic backups (on unless set to false)
 
   profile: personal  # Optional: for multi-machine setups
 
@@ -571,8 +571,9 @@ brew install hidedot</code></pre>
           <pre><code># Scaffold a starter config
 hidedot init
 
-# Adopt an existing file into your dotfiles dir
-hidedot adopt ~/.zshrc
+# Adopt existing files: moves them in, symlinks them back
+# and adds them to your config
+hidedot adopt ~/.zshrc ~/.config/nvim
 
 # Create symlinks (default command)
 hidedot
@@ -594,7 +595,7 @@ hidedot unlink --restore</code></pre>
       <h3 class="section-title">Commands</h3>
       <ul style="max-width: 600px; margin: 0 auto 30px; list-style-position: inside;">
         <li><strong>init</strong>: Create a starter <code>hidedot.conf.yaml</code> (use --force to overwrite)</li>
-        <li><strong>adopt &lt;path&gt;</strong>: Move an existing file into the dotfiles dir and symlink it back</li>
+        <li><strong>adopt &lt;path&gt;...</strong>: Move existing files into the dotfiles dir, symlink them back and add them to your config</li>
         <li><strong>link</strong>: Create symlinks from config (default)</li>
         <li><strong>status</strong>: Show status of all symlinks (OK, MISSING, BROKEN, MISMATCH)</li>
         <li><strong>unlink</strong>: Remove symlinks (use --restore to restore backups)</li>
