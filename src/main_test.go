@@ -10,6 +10,63 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// newTestApp returns an App rooted in temporary directories, quiet enough not
+// to spam test output.
+func newTestApp(t *testing.T) *App {
+	t.Helper()
+
+	dir := t.TempDir()
+	home := filepath.Join(dir, "home")
+	repo := filepath.Join(dir, "repo")
+	backups := filepath.Join(dir, "backups")
+	for _, d := range []string{home, repo, backups} {
+		if err := os.MkdirAll(d, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	return &App{
+		logger:     &Logger{quiet: true},
+		homeDir:    home,
+		execDir:    repo,
+		backupDir:  backups,
+		configPath: filepath.Join(repo, "hidedot.conf.yaml"),
+	}
+}
+
+// mustParseConfigs decodes YAML the same way LoadConfigs does, so tests exercise
+// the real config-to-struct wiring rather than hand-built structs.
+func mustParseConfigs(t *testing.T, src string) []Config {
+	t.Helper()
+
+	var configs []Config
+	if err := yaml.Unmarshal([]byte(src), &configs); err != nil {
+		t.Fatalf("parsing test config: %v", err)
+	}
+	return configs
+}
+
+func writeTestFile(t *testing.T, path, content string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func readTestFile(t *testing.T, path string) string {
+	t.Helper()
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
 func TestExpandPath(t *testing.T) {
 	home := "/home/user"
 	tests := []struct {
@@ -126,12 +183,15 @@ func TestShellCommandUnmarshalYAML(t *testing.T) {
 }
 
 func TestExpandTemplates(t *testing.T) {
-	app := &App{tmplData: TemplateData{
-		Hostname: "myhost",
-		Username: "bob",
-		OS:       "darwin",
-		Arch:     "arm64",
-	}}
+	app := &App{
+		logger: &Logger{quiet: true},
+		tmplData: TemplateData{
+			Hostname: "myhost",
+			Username: "bob",
+			OS:       "darwin",
+			Arch:     "arm64",
+		},
+	}
 	out, err := app.expandTemplates("host={{ .Hostname }} os={{ .OS }}/{{ .Arch }} user={{ .Username }}")
 	if err != nil {
 		t.Fatal(err)
@@ -141,10 +201,21 @@ func TestExpandTemplates(t *testing.T) {
 		t.Errorf("expandTemplates = %q, want %q", out, want)
 	}
 
-	// Invalid template returns original content unchanged.
+	// A file that doesn't parse as a template is used as-is: it probably holds
+	// a literal "{{" meant for some other tool.
 	orig := "value={{ .Missing "
-	if got, _ := app.expandTemplates(orig); got != orig {
-		t.Errorf("invalid template should return original, got %q", got)
+	got, err := app.expandTemplates(orig)
+	if err != nil {
+		t.Errorf("unparseable template should not fail: %v", err)
+	}
+	if got != orig {
+		t.Errorf("unparseable template should return original, got %q", got)
+	}
+
+	// A file that *is* a template but references an unknown variable is a real
+	// mistake and must not be silently ignored.
+	if _, err := app.expandTemplates("host={{ .Hostnam }}"); err == nil {
+		t.Error("expected an error for an unknown template variable")
 	}
 }
 

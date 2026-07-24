@@ -34,14 +34,29 @@ func (s LinkStatus) String() string {
 	}
 }
 
+// LinkDefaults holds the link behaviour for a config section. The fields are
+// pointers so an omitted key can be told apart from an explicit false — without
+// that, writing `defaults.link` without `backup:` would silently disable
+// backups while `force: true` overwrites real files.
+type LinkDefaults struct {
+	Relink           *bool `yaml:"relink,omitempty"`
+	Force            *bool `yaml:"force,omitempty"`
+	Backup           *bool `yaml:"backup,omitempty"`
+	RemoveDuplicates *bool `yaml:"remove_duplicates,omitempty"`
+}
+
+// linkOptions is the resolved form of LinkDefaults for one config section.
+type linkOptions struct {
+	force            bool
+	relink           bool
+	backup           bool
+	removeDuplicates bool
+}
+
 // Config represents a single configuration section
 type Config struct {
 	Defaults *struct {
-		Link struct {
-			Relink bool `yaml:"relink"`
-			Force  bool `yaml:"force"`
-			Backup bool `yaml:"backup"`
-		} `yaml:"link"`
+		Link LinkDefaults `yaml:"link"`
 	} `yaml:"defaults,omitempty"`
 	Profile string             `yaml:"profile,omitempty"`
 	Link    map[string]string  `yaml:"link,omitempty"`

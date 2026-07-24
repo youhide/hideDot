@@ -33,6 +33,9 @@ func main() {
 		Short:   "A blazing fast dotFiles manager",
 		Long:    "hideDot - Easily manage your dotfiles, symlinks, and system configuration with a simple YAML config.",
 		Version: Version,
+		// Runtime failures are already reported per item; don't bury them
+		// under the full usage text.
+		SilenceUsage: true,
 	}
 
 	// Global flags
@@ -128,18 +131,23 @@ func main() {
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "Overwrite an existing config file")
 
 	// Adopt command
+	var adoptTo string
+	var adoptNoConfig bool
 	adoptCmd := &cobra.Command{
-		Use:   "adopt <path>",
-		Short: "Move an existing file into the dotfiles dir and symlink it",
-		Long:  "Move an existing file or directory into the dotfiles directory and replace it with a symlink pointing back.",
-		Args:  cobra.ExactArgs(1),
+		Use:   "adopt <path>...",
+		Short: "Move existing files into the dotfiles dir, symlink them and record them in the config",
+		Long: "Move existing files or directories into the dotfiles directory, replace them with symlinks pointing back, " +
+			"and add the matching entries to your config file.",
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := app.Initialize(); err != nil {
 				return err
 			}
-			return app.RunAdopt(args[0])
+			return app.RunAdopt(args, adoptTo, !adoptNoConfig)
 		},
 	}
+	adoptCmd.Flags().StringVar(&adoptTo, "to", "", "Destination inside the dotfiles dir (single path only)")
+	adoptCmd.Flags().BoolVar(&adoptNoConfig, "no-config", false, "Print the config entry instead of writing it")
 
 	// Add all commands
 	rootCmd.AddCommand(linkCmd, statusCmd, unlinkCmd, backupCmd, initCmd, adoptCmd)

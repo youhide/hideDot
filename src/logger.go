@@ -125,6 +125,9 @@ func (l *Logger) heading(format string, args ...interface{}) {
 }
 
 func (l *Logger) summary() {
+	if l.quiet {
+		return
+	}
 	if l.useColors {
 		fmt.Printf("\n"+BoldGreen+"%d successful"+Reset+", "+BoldYellow+"%d warnings"+Reset+", "+BoldRed+"%d errors"+Reset+"\n",
 			l.successCount, l.warnCount, l.errorCount)

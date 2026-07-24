@@ -7,26 +7,33 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
 // RunLink executes the link command
 func (app *App) RunLink(configs []Config) error {
+	declared := app.declaredTargets(configs)
+
 	for _, config := range configs {
-		force, relink, backup := app.getDefaultOptions(config)
+		opts := app.getDefaultOptions(config)
 
 		if config.Defaults != nil {
-			app.logger.info("Settings: force=%v, relink=%v, backup=%v", force, relink, backup)
+			app.logger.info("Settings: force=%v, relink=%v, backup=%v", opts.force, opts.relink, opts.backup)
 		}
 
-		// Run pre-link hooks
+		// Run pre-link hooks. A failing pre-hook means the section's
+		// preconditions aren't met, so skip the whole section rather than
+		// linking on top of a half-prepared system.
 		if config.Hooks != nil && len(config.Hooks.PreLink) > 0 {
 			app.logger.heading("Running pre-link hooks...")
 			if err := app.runHooks(config.Hooks.PreLink); err != nil {
-				app.logger.error("Pre-link hook failed: %v", err)
+				app.logger.error("Pre-link hook failed, skipping this config section: %v", err)
+				continue
 			}
 		}
 
@@ -38,11 +45,12 @@ func (app *App) RunLink(configs []Config) error {
 			}
 		}
 
-		// Process link creation
+		// Process link creation. Maps iterate in random order, so sort the
+		// keys to keep runs (and their output) reproducible.
 		if len(config.Link) > 0 {
 			app.logger.heading("Creating links...")
-			for target, source := range config.Link {
-				app.createLink(target, source, force, relink, backup && !app.noBackup)
+			for _, target := range slices.Sorted(maps.Keys(config.Link)) {
+				app.createLink(target, config.Link[target], opts, declared)
 			}
 		}
 
@@ -57,16 +65,18 @@ func (app *App) RunLink(configs []Config) error {
 		// Process git repositories
 		if len(config.Git) > 0 {
 			app.logger.heading("Setting up git repositories...")
-			for path, repo := range config.Git {
-				app.cloneRepo(path, repo)
+			for _, path := range slices.Sorted(maps.Keys(config.Git)) {
+				app.cloneRepo(path, config.Git[path])
 			}
 		}
 
-		// Run pre-shell hooks
+		// Run pre-shell hooks. Shell commands are the destructive part of a
+		// section, so a failing pre-hook skips them (and the post-hooks).
 		if config.Hooks != nil && len(config.Hooks.PreShell) > 0 {
 			app.logger.heading("Running pre-shell hooks...")
 			if err := app.runHooks(config.Hooks.PreShell); err != nil {
-				app.logger.error("Pre-shell hook failed: %v", err)
+				app.logger.error("Pre-shell hook failed, skipping shell commands: %v", err)
+				continue
 			}
 		}
 
@@ -88,7 +98,25 @@ func (app *App) RunLink(configs []Config) error {
 	}
 
 	app.logger.summary()
-	return nil
+	return app.failureError()
+}
+
+// declaredTargets collects every link target across all configs, so duplicate
+// removal can never delete a path the user explicitly manages.
+func (app *App) declaredTargets(configs []Config) map[string]bool {
+	targets := make(map[string]bool)
+
+	for _, config := range configs {
+		for target := range config.Link {
+			path, err := filepath.Abs(expandPath(target, app.homeDir))
+			if err != nil {
+				continue
+			}
+			targets[path] = true
+		}
+	}
+
+	return targets
 }
 
 func (app *App) createDirectory(dir string) {
@@ -119,8 +147,9 @@ func (app *App) createDirectory(dir string) {
 	}
 }
 
-func (app *App) createLink(target, source string, force, relink, backup bool) {
+func (app *App) createLink(target, source string, opts linkOptions, declared map[string]bool) {
 	targetPath := expandPath(target, app.homeDir)
+	targetPath, _ = filepath.Abs(targetPath)
 	sourcePath := expandSourcePath(source, app.homeDir, app.execDir)
 	sourcePath, _ = filepath.Abs(sourcePath)
 
@@ -150,8 +179,10 @@ func (app *App) createLink(target, source string, force, relink, backup bool) {
 		return
 	}
 
-	// Check for duplicates
-	app.checkForDuplicates(targetPath, sourcePath)
+	// Check for duplicates (opt-in: it deletes files)
+	if opts.removeDuplicates {
+		app.checkForDuplicates(targetPath, sourcePath, declared)
+	}
 
 	// Check target path
 	targetExists, isTargetDir, _ := checkPathExists(targetPath)
@@ -173,7 +204,7 @@ func (app *App) createLink(target, source string, force, relink, backup bool) {
 					return
 				}
 
-				if relink {
+				if opts.relink {
 					app.logger.warn("Relinking: %s → %s (was: %s)", targetPath, sourcePath, currentTarget)
 					app.logger.execute(func() error {
 						return os.Remove(targetPath)
@@ -183,10 +214,15 @@ func (app *App) createLink(target, source string, force, relink, backup bool) {
 					return
 				}
 			}
-		} else if force {
-			// Not a symlink but force is true - backup first if enabled
-			if backup {
-				app.createBackup(targetPath, isTargetDir)
+		} else if opts.force {
+			// Not a symlink but force is true - back it up before destroying it.
+			// If that backup can't be made, leave the file alone: an
+			// unrecoverable overwrite is worse than a skipped link.
+			if opts.backup {
+				if err := app.createBackup(targetPath, isTargetDir); err != nil {
+					app.logger.error("Backup failed, refusing to overwrite %s: %v", targetPath, err)
+					return
+				}
 			}
 			app.logger.warn("Removing existing path (force=true): %s", targetPath)
 			app.logger.execute(func() error {
@@ -209,7 +245,16 @@ func (app *App) createLink(target, source string, force, relink, backup bool) {
 	}
 }
 
-func (app *App) checkForDuplicates(targetPath, sourcePath string) {
+// checkForDuplicates removes other symlinks in the target's directory that point
+// at the same source. Targets declared anywhere in the config are never touched:
+// two config entries sharing one source are a legitimate setup (~/.bashrc and
+// ~/.bash_profile, say), and deleting one of them would make the two entries
+// destroy each other on every run.
+//
+// Removals are logged rather than backed up on purpose. A symlink holds no data
+// of its own, and backups are keyed by path — copying one here would follow the
+// link and overwrite an existing backup of the real file that used to live there.
+func (app *App) checkForDuplicates(targetPath, sourcePath string, declared map[string]bool) {
 	targetDir := filepath.Dir(targetPath)
 
 	entries, err := os.ReadDir(targetDir)
@@ -220,7 +265,7 @@ func (app *App) checkForDuplicates(targetPath, sourcePath string) {
 	for _, entry := range entries {
 		entryPath := filepath.Join(targetDir, entry.Name())
 
-		if entryPath == targetPath {
+		if entryPath == targetPath || declared[entryPath] {
 			continue
 		}
 
@@ -236,7 +281,7 @@ func (app *App) checkForDuplicates(targetPath, sourcePath string) {
 			linkDest, _ = filepath.Abs(linkDest)
 
 			if linkDest == sourcePath {
-				app.logger.warn("Found duplicate symlink: %s → %s", entryPath, sourcePath)
+				app.logger.warn("Removing duplicate symlink: %s → %s", entryPath, sourcePath)
 				app.logger.execute(func() error {
 					return os.Remove(entryPath)
 				})

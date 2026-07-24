@@ -36,8 +36,9 @@ brew install hidedot
 # Scaffold a starter config in the current directory
 hidedot init
 
-# Adopt an existing file: move it into the dotfiles dir and symlink it back
-hidedot adopt ~/.zshrc
+# Adopt existing files: move them into the dotfiles dir, symlink them back
+# and add the entries to your config
+hidedot adopt ~/.zshrc ~/.config/nvim
 
 # Create symlinks (default command)
 hidedot
@@ -64,9 +65,10 @@ Create `hidedot.conf.yaml`:
 ```yaml
 - defaults:
     link:
-      relink: true
-      force: true
-      backup: true  # Enable automatic backups
+      relink: true            # Replace symlinks that point somewhere else
+      force: true             # Replace files/dirs that are not symlinks
+      backup: true            # Automatic backups — on unless set to false
+      remove_duplicates: false  # Delete other symlinks pointing at the same source
   
   # Optional: profile for filtering configs
   profile: personal
@@ -145,12 +147,65 @@ Available template variables:
 | Command | Description |
 |---------|-------------|
 | `init` | Create a starter `hidedot.conf.yaml` (use `--force` to overwrite) |
-| `adopt <path>` | Move an existing file/dir into the dotfiles dir and replace it with a symlink |
+| `adopt <path>...` | Move existing files/dirs into the dotfiles dir, replace them with symlinks and add them to the config |
 | `link` | Create symlinks from config (default) |
 | `status` | Show status of all symlinks (OK, MISSING, BROKEN, MISMATCH) |
 | `unlink` | Remove symlinks (use `--restore` to restore backups) |
 | `backup create` | Manually create backups of all linked files |
 | `backup list` | List available backups |
+
+### `adopt`
+
+`adopt` takes files you already have and brings them under hideDot's control in one step:
+it backs the file up, moves it into your dotfiles directory, replaces the original with a
+symlink, and writes the matching `link:` entry into your config — comments and formatting
+preserved.
+
+The destination mirrors the file's own location, minus the leading dots:
+
+| Original | Lands in the repo as |
+|----------|----------------------|
+| `~/.zshrc` | `./zshrc` |
+| `~/.config/nvim` | `./config/nvim` |
+| `~/.config/git/config` | `./config/git/config` |
+
+```bash
+hidedot adopt ~/.zshrc ~/.config/nvim   # several paths at once
+hidedot adopt ~/.zshrc --to zsh/zshrc   # choose the destination
+hidedot adopt ~/.zshrc --no-config      # print the config entry instead of writing it
+hidedot adopt ~/.zshrc --dry-run        # preview the move and the resulting config
+```
+
+With `--profile`, the entry is written to the section declaring that profile. If no section
+matches, hideDot leaves the file alone and prints the entry instead.
+
+| Flag | Description |
+|------|-------------|
+| `--to` | Destination inside the dotfiles dir (single path only) |
+| `--no-config` | Print the config entry instead of writing it |
+
+## Backups
+
+Before overwriting anything that isn't already a symlink, hideDot copies it to
+`~/.hidedot-backups`. Backups are keyed by the original path, so re-running keeps one
+current copy per file rather than piling up. If a backup can't be made, hideDot refuses to
+overwrite the file.
+
+```bash
+hidedot backup create   # back up every linked target
+hidedot backup list     # original paths and when they were saved
+hidedot unlink --restore
+```
+
+Turn it off per run with `--no-backup`, or per config section with `backup: false`.
+
+## Exit codes
+
+`hidedot` exits `1` when any operation fails, so it can be used in scripts and CI:
+
+```bash
+hidedot || echo "something did not apply"
+```
 
 ## Examples
 

@@ -48,7 +48,7 @@ func (app *App) Initialize() error {
 		return fmt.Errorf("error getting home directory: %w", err)
 	}
 
-	app.execDir, err = getExecutableDir()
+	app.execDir, err = getWorkingDir()
 	if err != nil {
 		return fmt.Errorf("error getting executable directory: %w", err)
 	}
@@ -112,16 +112,23 @@ func (app *App) LoadConfigs() ([]Config, error) {
 	return filteredConfigs, nil
 }
 
-// expandTemplates expands Go templates in the config
+// expandTemplates expands Go templates in the config.
+//
+// A parse failure is tolerated: the file most likely isn't a template at all and
+// just happens to contain a literal "{{" (a shell command for another tool, say).
+// An execution failure is not — at that point the file *is* a template and the
+// error is a real mistake, usually a misspelled variable. Swallowing it would
+// create links with "{{ .Hostnam }}" baked into their names.
 func (app *App) expandTemplates(content string) (string, error) {
 	tmpl, err := template.New("config").Parse(content)
 	if err != nil {
-		return content, nil // Return original if template parsing fails
+		app.logger.warn("Config is not a valid template, using it as-is: %v", err)
+		return content, nil
 	}
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, app.tmplData); err != nil {
-		return content, nil // Return original if template execution fails
+		return "", err
 	}
 
 	return buf.String(), nil
@@ -160,9 +167,38 @@ func (app *App) validateConfig(cfg Config) error {
 }
 
 // getDefaultOptions resolves the effective link options for a config section.
-func (app *App) getDefaultOptions(config Config) (force, relink, backup bool) {
-	if config.Defaults == nil {
-		return false, false, true // backup enabled by default
+// An omitted key falls back to the default: backups on, everything else off.
+func (app *App) getDefaultOptions(config Config) linkOptions {
+	opts := linkOptions{backup: true}
+
+	if config.Defaults != nil {
+		l := config.Defaults.Link
+		opts.force = boolValue(l.Force, false)
+		opts.relink = boolValue(l.Relink, false)
+		opts.backup = boolValue(l.Backup, true)
+		opts.removeDuplicates = boolValue(l.RemoveDuplicates, false)
 	}
-	return config.Defaults.Link.Force, config.Defaults.Link.Relink, config.Defaults.Link.Backup
+
+	if app.noBackup {
+		opts.backup = false
+	}
+
+	return opts
+}
+
+// boolValue dereferences an optional config flag, falling back to def.
+func boolValue(p *bool, def bool) bool {
+	if p == nil {
+		return def
+	}
+	return *p
+}
+
+// failureError turns per-item failures that were already logged into a non-zero
+// exit status, so scripts and CI can tell a partial run from a clean one.
+func (app *App) failureError() error {
+	if app.logger == nil || app.logger.errorCount == 0 {
+		return nil
+	}
+	return fmt.Errorf("%d operation(s) failed", app.logger.errorCount)
 }

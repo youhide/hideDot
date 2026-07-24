@@ -22,7 +22,9 @@ func buildShellCmd(command string) *exec.Cmd {
 	return exec.Command("bash", "-c", command)
 }
 
-func getExecutableDir() (string, error) {
+// getWorkingDir returns the directory relative link sources are resolved
+// against: the directory hidedot was invoked from, not where the binary lives.
+func getWorkingDir() (string, error) {
 	// First, try to use the current working directory
 	if cwd, err := os.Getwd(); err == nil {
 		return cwd, nil
@@ -110,6 +112,56 @@ func copyFile(src, dst string) error {
 	}
 
 	return os.Chmod(dst, srcInfo.Mode())
+}
+
+// movePath moves src to dst, falling back to copy-then-delete when the two live
+// on different filesystems (os.Rename fails with EXDEV there).
+func movePath(src, dst string, isDir bool) error {
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+
+	if isDir {
+		if err := copyDir(src, dst); err != nil {
+			return err
+		}
+	} else if err := copyFile(src, dst); err != nil {
+		return err
+	}
+
+	return os.RemoveAll(src)
+}
+
+// writeFileAtomic writes through a temp file in the same directory, so an
+// interrupted write can never leave a truncated config behind.
+func writeFileAtomic(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".tmp*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+
+	// Preserve the original file's mode when replacing an existing file.
+	if info, err := os.Stat(path); err == nil {
+		if err := os.Chmod(tmpName, info.Mode()); err != nil {
+			return err
+		}
+	}
+
+	return os.Rename(tmpName, path)
 }
 
 func copyDir(src, dst string) error {
