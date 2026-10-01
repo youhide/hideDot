@@ -20,13 +20,12 @@ A blazing fast dotFiles manager written in Go. Easily manage your dotfiles, syml
 ## Installation
 
 ```bash
-brew tap youhide/homebrew-youhide
-brew install hidedot
+brew install youhide/tap/hidedot
 ```
 
 > Recent Homebrew versions require you to trust third-party taps before the
 > first install. If you see `Refusing to load formula ... from untrusted tap`,
-> run `brew trust youhide/youhide` once and re-run the install.
+> run `brew trust youhide/tap` once and re-run the install.
 
 ## Usage
 

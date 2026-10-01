@@ -47,9 +47,9 @@ changelog:
       - "^docs:"
       - "^test:"
 
-# The Homebrew formula is published to youhide/homebrew-youhide by a dedicated
-# CI step (.github/scripts/update-tap-formula.sh) that reads these checksums —
-# GoReleaser only builds the binaries, archives and GitHub release here.
+# youhide/homebrew-tap regenerates the Homebrew formula from the release on
+# its own, reading these checksums and the default archive names — GoReleaser
+# only builds the binaries, archives and GitHub release here.
 checksum:
   name_template: "checksums.txt"
 
